@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.name }} – AI Marketplace</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<header class="site-header">
+    <nav class="navbar">
+        <a href="/" class="brand">AI Marketplace</a>
+        <ul class="nav-links">
+            <li><a href="/products/">Products</a></li>
+            <li><a href="/cart/">Cart</a></li>
+            <li><a href="/about/">About</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="product-page container">
+    {% if messages %}
+        <section class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    <section class="product-detail">
+        <div class="product-image">
+            {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.name }}">
+            {% else %}
+                <img src="{% static 'images/placeholder.png' %}" alt="No image available">
+            {% endif %}
+        </div>
+        <div class="product-info">
+            <h1>{{ product.name }}</h1>
+            <p class="price">${{ product.price|floatformat:2 }}</p>
+            <p class="description">{{ product.description|linebreaksbr }}</p>
+
+            <form action="{% url 'add_to_cart' product.id %}" method="post" class="add-to-cart-form">
+                {% csrf_token %}
+                <label for="quantity">Quantity:</label>
+                <input type="number" name="quantity" id="quantity" value="1" min="1" required>
+                <button type="submit" class="btn-primary">Add to Cart</button>
+            </form>
+
+            {% if product.stock > 0 %}
+                <p class="stock-status in-stock">In Stock: {{ product.stock }}</p>
+            {% else %}
+                <p class="stock-status out-of-stock">Out of Stock</p>
+            {% endif %}
+        </div>
+    </section>
+
+    {% if recommendations %}
+    <section class="recommendations">
+        <h2>Customers also bought</h2>
+        <ul class="recommended-list">
+            {% for rec in recommendations %}
+                <li class="recommended-item">
+                    <a href="{% url 'product_detail' rec.id %}">
+                        {% if rec.image_url %}
+                            <img src="{{ rec.image_url }}" alt="{{ rec.name }}">
+                        {% else %}
+                            <img src="{% static 'images/placeholder.png' %}" alt="No image available">
+                        {% endif %}
+                        <span class="rec-name">{{ rec.name }}</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+</main>
+
+<footer class="site-footer">
+    <p>&copy; {{ current_year }} AI Marketplace. All rights reserved.</p>
+</footer>
+</body>
+</html>
